@@ -15,6 +15,8 @@ def SVM_worker(arg):
 
 
 def ANN_worker(arg, save_dir):
+    if not os.path.exists('./data'):
+        os.mkdir('./data')
     train_dataset = torchvision.datasets.MNIST(root='./data',
                                                train=True,
                                                transform=transforms.ToTensor(),
@@ -117,15 +119,20 @@ if __name__ == '__main__':
     parser.add_argument('-ds', '--decay_step', type=int, default=5)
     parser.add_argument('-dg', '--decay_gamma', type=float, default=0.1)
     parser.add_argument('-v', '--is_val', action='store_true', help="whether do validation and split train set")
-
+    if not os.path.exists('./exp'):
+        os.mkdir('./exp')
     arg = parser.parse_args()
     print(f"Start training with {arg.type}")
     datetime = datetime.datetime.now()
     start = time.time()
     if arg.type == 'SVM':
+        if not os.path.exists('./exp/SVM'):
+            os.mkdir('./exp/SVM')
         save_dir = './exp/SVM'
         SVM_worker(arg)
     elif arg.type == 'ANN':
+        if not os.path.exists('./exp/ANN'):
+            os.mkdir('./exp/ANN')
         save_name = f"train_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
                     f"ds{arg.decay_step}dg{arg.decay_gamma}_" \
                     f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}"
