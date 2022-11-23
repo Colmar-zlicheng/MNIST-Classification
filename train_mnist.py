@@ -19,16 +19,26 @@ def ANN_worker(arg, save_dir):
                                                train=True,
                                                transform=transforms.ToTensor(),
                                                download=True)
+    if arg.is_val is True:
+        print("split train [60000] set into train+val as [50000, 10000]")
+        train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [50000, 10000])
+        val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
+                                                 batch_size=arg.batch_size,
+                                                 shuffle=True)
+    else:
+        print("do not split train set")
 
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset,
                                                batch_size=arg.batch_size,
                                                shuffle=True)
+
     test_dataset = torchvision.datasets.MNIST(root='./data',
                                               train=False,
                                               transform=transforms.ToTensor())
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                               batch_size=arg.batch_size,
                                               shuffle=False)
+
     model = MNIST(num_class=10)
     optimizer = torch.optim.Adam(model.parameters(), lr=arg.learning_rate)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, arg.decay_step, arg.decay_gamma)
@@ -53,6 +63,24 @@ def ANN_worker(arg, save_dir):
 
     if arg.is_val is True:
         print("do validation")
+        with torch.no_grad():
+            correct = 0
+            total = 0
+            model.eval()
+            val_bar = etqdm(val_loader)
+            for bidx, (images, labels) in enumerate(val_bar):
+                pred, loss = model(images, labels)
+                loss_show = ('%.12f' % loss)
+                val_bar.set_description(f"{bar_perfixes['val']} Loss {loss_show}")
+                _, predicted = torch.max(pred.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+                acc = 100 * correct / total
+            print('Accuracy on val set: {} %'.format(acc))
+            save_acc_path = os.path.join(save_dir, 'acc_val_txt')
+            with open(save_acc_path, 'w') as ff_v:
+                ff_v.write("Correct_val:" + str(correct) + '\n')
+                ff_v.write("Accuracy_val:" + str(acc) + '\n')
 
     print("do test and compute accuracy")
     with torch.no_grad():
@@ -61,16 +89,18 @@ def ANN_worker(arg, save_dir):
         model.eval()
         test_bar = etqdm(test_loader)
         for bidx, (images, labels) in enumerate(test_bar):
-            pred, _ = model(images, labels)
+            pred, loss = model(images, labels)
+            loss_show = ('%.12f' % loss)
+            test_bar.set_description(f"{bar_perfixes['test']} Loss {loss_show}")
             _, predicted = torch.max(pred.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             acc = 100 * correct / total
         print('Accuracy on test set: {} %'.format(acc))
-        save_acc_path = os.path.join(save_dir, 'acc_txt')
+        save_acc_path = os.path.join(save_dir, 'acc_test_txt')
         with open(save_acc_path, 'w') as ff:
-            ff.write("Correct:" + str(correct) + '\n')
-            ff.write("Accuracy:" + str(acc) + '\n')
+            ff.write("Correct_test:" + str(correct) + '\n')
+            ff.write("Accuracy_test:" + str(acc) + '\n')
 
     print("beginning save checkpoints")
     save_path = os.path.join(save_dir, 'model.ckpt')
@@ -81,12 +111,12 @@ def ANN_worker(arg, save_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--type', type=str, default='ANN', choices=['SVM,ANN'])
-    parser.add_argument('-b', '--batch_size', type=int, default=8)
-    parser.add_argument('-e', '--epoch_size', type=int, default=100)
+    parser.add_argument('-b', '--batch_size', type=int, default=100)
+    parser.add_argument('-e', '--epoch_size', type=int, default=10)
     parser.add_argument('-lr', '--learning_rate', type=float, default=0.001)
-    parser.add_argument('-ds', '--decay_step', type=int, default=50)
+    parser.add_argument('-ds', '--decay_step', type=int, default=5)
     parser.add_argument('-dg', '--decay_gamma', type=float, default=0.1)
-    parser.add_argument('-v', '--is_val', type=bool, default=True)
+    parser.add_argument('-v', '--is_val', action='store_true', help="whether do validation and split train set")
 
     arg = parser.parse_args()
     print(f"Start training with {arg.type}")
