@@ -12,6 +12,31 @@ from lib.utils.misc import bar_perfixes
 from torch.utils.tensorboard import SummaryWriter
 
 
+def save_Hyperparameters(arg):
+    if arg.is_val is True:
+        run_type = 'val'
+    else:
+        run_type = 'train'
+    save_name = f"{run_type}_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
+                f"{arg.optimizer_type}_ds{arg.decay_step}_" \
+                f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}{datetime.second}"
+    save_dir = os.path.join('./exp/ANN', save_name)
+    os.mkdir(save_dir)
+    hype_dir = os.path.join(save_dir, 'Hyperparameters.txt')
+    with open(hype_dir,'w') as f:
+        f.write("ANN_Hyperparameters:" + '\n')
+        f.write("epoch_size:" + str(arg.epoch_size) + '\n')
+        f.write("batch_size:" + str(arg.batch_size) + '\n')
+        f.write("learning_rate:" + str(arg.learning_rate) + '\n')
+        f.write("decay_step:" + str(arg.decay_step) + '\n')
+        f.write("decay_gamma:" + str(arg.decay_gamma) + '\n')
+        f.write("weight_decay:" + str(arg.weight_decay) + '\n')
+        f.write("optimizer_type:" + str(arg.optimizer_type) + '\n')
+        if arg.optimizer_type == 'SGD':
+            f.write("SGD_momentum:" + str(arg.sgd_momentum) + '\n')
+        f.write("is_do_validation:" + str(arg.is_val) + '\n')
+    return save_dir
+
 def ANN_worker(arg, save_dir, summary):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if not os.path.exists('./data'):
@@ -55,6 +80,8 @@ def ANN_worker(arg, save_dir, summary):
     for epoch_idx in range(arg.epoch_size):
         model.train()
         train_bar = etqdm(train_loader)
+        correct = 0
+        total = 0
         for bidx, (images, labels) in enumerate(train_bar):
             step_idx = epoch_idx * len(train_loader) + bidx
             pred, loss = model(images.to(device), labels.to(device))  # , step_idx, 'train')
@@ -66,7 +93,11 @@ def ANN_worker(arg, save_dir, summary):
             optimizer.step()
             if step_idx % arg.log_interval == 0:
                 summary.add_scalar(f"scalar/loss", loss, global_step=step_idx, walltime=None)
-
+            _, predicted = torch.max(pred.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+        train_acc = 100 * correct / total
+        summary.add_scalar(f"scalar/train_acc", train_acc, global_step=epoch_idx, walltime=None)
         scheduler.step()
         print(f"Current LR: {[group['lr'] for group in optimizer.param_groups]}")
 
@@ -84,7 +115,7 @@ def ANN_worker(arg, save_dir, summary):
                 _, predicted = torch.max(pred.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-                acc = 100 * correct / total
+            acc = 100 * correct / total
             print('Accuracy on val set: {} %'.format(acc))
             save_acc_path = os.path.join(save_dir, 'acc_val_txt')
             with open(save_acc_path, 'w') as ff_v:
@@ -132,38 +163,20 @@ if __name__ == '__main__':
 
     if not os.path.exists('./exp'):
         os.mkdir('./exp')
+    if not os.path.exists('./exp/ANN'):
+        os.mkdir('./exp/ANN')
+
     arg = parser.parse_args()
     print(f"Start training with ANN")
     datetime = datetime.datetime.now()
     start = time.time()
 
-    if not os.path.exists('./exp/ANN'):
-        os.mkdir('./exp/ANN')
-    if arg.is_val is True:
-        run_type = 'val'
-    else:
-        run_type = 'train'
-    save_name = f"{run_type}_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
-                f"{arg.optimizer_type}_ds{arg.decay_step}_" \
-                f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}{datetime.second}"
-    save_dir = os.path.join('./exp/ANN', save_name)
-    os.mkdir(save_dir)
-    hype_dir = os.path.join(save_dir, 'Hyperparameters.txt')
-    with open(hype_dir,'w') as f:
-        f.write("ANN_Hyperparameters:" + '\n')
-        f.write("epoch_size:" + str(arg.epoch_size) + '\n')
-        f.write("batch_size:" + str(arg.batch_size) + '\n')
-        f.write("learning_rate:" + str(arg.learning_rate) + '\n')
-        f.write("decay_step:" + str(arg.decay_step) + '\n')
-        f.write("decay_gamma:" + str(arg.decay_gamma) + '\n')
-        f.write("weight_decay:" + str(arg.weight_decay) + '\n')
-        f.write("optimizer_type:" + str(arg.optimizer_type) + '\n')
-        if arg.optimizer_type == 'SGD':
-            f.write("SGD_momentum:" + str(arg.sgd_momentum) + '\n')
-        f.write("is_do_validation:" + str(arg.is_val) + '\n')
+    save_dir = save_Hyperparameters(arg)
+
     summary_dir = os.path.join(save_dir, 'run')
     os.mkdir(summary_dir)
     summary = SummaryWriter(summary_dir)
+
     ANN_worker(arg, save_dir, summary)
 
     end = time.time()
