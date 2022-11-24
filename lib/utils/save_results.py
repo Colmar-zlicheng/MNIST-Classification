@@ -12,6 +12,7 @@ def save_results_ANN(arg, val_acc, test_acc, exp):
                              'decay_step', 'decay_gamma', 'weight_decay',
                              'optimizer_type', 'sgd_momentum', 'do_val(split train)',
                              'val_acc', 'test_acc', 'exp'])
+        total += 1
     if arg.optimizer_type == 'SGD':
         sgd_momentum = arg.sgd_momentum
     else:
