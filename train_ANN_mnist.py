@@ -47,6 +47,7 @@ def ANN_worker(arg, save_dir, summary):
                                                download=True)
     if arg.is_val is True:
         print("split train [60000] set into train+val as [50000, 10000]")
+        torch.manual_seed(0)
         train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [50000, 10000])
         val_loader = torch.utils.data.DataLoader(dataset=val_dataset,
                                                  batch_size=arg.batch_size,
