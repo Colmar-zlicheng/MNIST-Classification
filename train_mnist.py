@@ -15,6 +15,7 @@ def SVM_worker(arg):
 
 
 def ANN_worker(arg, save_dir):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if not os.path.exists('./data'):
         os.mkdir('./data')
     train_dataset = torchvision.datasets.MNIST(root='./data',
@@ -41,7 +42,7 @@ def ANN_worker(arg, save_dir):
                                               batch_size=arg.batch_size,
                                               shuffle=False)
 
-    model = MNIST(num_class=10)
+    model = MNIST(num_class=10).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=arg.learning_rate)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, arg.decay_step, arg.decay_gamma)
     print(f"Start training from epoch 0 to {arg.epoch_size}")
@@ -50,8 +51,7 @@ def ANN_worker(arg, save_dir):
         train_bar = etqdm(train_loader)
         for bidx, (images, labels) in enumerate(train_bar):
             # step_idx = epoch_idx * len(train_loader) + bidx
-
-            pred, loss = model(images, labels)  # , step_idx, 'train')
+            pred, loss = model(images.to(device), labels.to(device))  # , step_idx, 'train')
 
             loss_show = ('%.12f' % loss)
             train_bar.set_description(f"{bar_perfixes['train']} Epoch {epoch_idx} Loss {loss_show}")
@@ -71,7 +71,7 @@ def ANN_worker(arg, save_dir):
             model.eval()
             val_bar = etqdm(val_loader)
             for bidx, (images, labels) in enumerate(val_bar):
-                pred, loss = model(images, labels)
+                pred, loss = model(images.to(device), labels.to(device))
                 loss_show = ('%.12f' % loss)
                 val_bar.set_description(f"{bar_perfixes['val']} Loss {loss_show}")
                 _, predicted = torch.max(pred.data, 1)
@@ -91,7 +91,7 @@ def ANN_worker(arg, save_dir):
         model.eval()
         test_bar = etqdm(test_loader)
         for bidx, (images, labels) in enumerate(test_bar):
-            pred, loss = model(images, labels)
+            pred, loss = model(images.to(device), labels.to(device))
             loss_show = ('%.12f' % loss)
             test_bar.set_description(f"{bar_perfixes['test']} Loss {loss_show}")
             _, predicted = torch.max(pred.data, 1)
@@ -135,7 +135,7 @@ if __name__ == '__main__':
             os.mkdir('./exp/ANN')
         save_name = f"train_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
                     f"ds{arg.decay_step}dg{arg.decay_gamma}_" \
-                    f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}"
+                    f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}{datetime.second}"
         save_dir = os.path.join('./exp/ANN', save_name)
         os.mkdir(save_dir)
         hype_dir = os.path.join(save_dir, 'Hyperparameters.txt')
@@ -143,6 +143,7 @@ if __name__ == '__main__':
             f.write("ANN_Hyperparameters:" + '\n')
             f.write("epoch_size:" + str(arg.epoch_size) + '\n')
             f.write("batch_size:" + str(arg.batch_size) + '\n')
+            f.write("learning_rate:" + str(arg.learning_rate) + '\n')
             f.write("decay_step:" + str(arg.decay_step) + '\n')
             f.write("decay_gamma:" + str(arg.decay_gamma) + '\n')
             f.write("is_do_validation:" + str(arg.is_val) + '\n')
