@@ -153,6 +153,10 @@ def ANN_worker(arg, save_dir, summary):
     save_path = os.path.join(save_dir, 'model.ckpt')
     torch.save(model.state_dict(), save_path)
     print("-----successfully save checkpoints-----")
+    if arg.is_val is True:
+        val_acc = val_acc
+    else:
+        val_acc = 0
     save_results_ANN(arg=arg, val_acc=val_acc, test_acc=acc, exp=save_dir)
     print("-----successfully save results-----")
 
