@@ -23,7 +23,7 @@ def save_Hyperparameters(arg):
     save_dir = os.path.join('./exp/ANN', save_name)
     os.mkdir(save_dir)
     hype_dir = os.path.join(save_dir, 'Hyperparameters.txt')
-    with open(hype_dir,'w') as f:
+    with open(hype_dir, 'w') as f:
         f.write("ANN_Hyperparameters:" + '\n')
         f.write("epoch_size:" + str(arg.epoch_size) + '\n')
         f.write("batch_size:" + str(arg.batch_size) + '\n')
@@ -101,26 +101,30 @@ def ANN_worker(arg, save_dir, summary):
         scheduler.step()
         print(f"Current LR: {[group['lr'] for group in optimizer.param_groups]}")
 
-    if arg.is_val is True:
-        print("do validation")
-        with torch.no_grad():
-            correct = 0
-            total = 0
-            model.eval()
-            val_bar = etqdm(val_loader)
-            for bidx, (images, labels) in enumerate(val_bar):
-                pred, loss = model(images.to(device), labels.to(device))
-                loss_show = ('%.12f' % loss)
-                val_bar.set_description(f"{bar_perfixes['val']} Loss {loss_show}")
-                _, predicted = torch.max(pred.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-            acc = 100 * correct / total
-            print('Accuracy on val set: {} %'.format(acc))
-            save_acc_path = os.path.join(save_dir, 'acc_val_txt')
-            with open(save_acc_path, 'w') as ff_v:
-                ff_v.write("Correct_val:" + str(correct) + '\n')
-                ff_v.write("Accuracy_val:" + str(acc) + '\n')
+        if arg.is_val is True:
+            # print("do validation")
+            if epoch_idx % arg.eval_interval == 0:
+                with torch.no_grad():
+                    correct = 0
+                    total = 0
+                    model.eval()
+                    val_bar = etqdm(val_loader)
+                    for bidx, (images, labels) in enumerate(val_bar):
+                        pred, loss = model(images.to(device), labels.to(device))
+                        loss_show = ('%.12f' % loss)
+                        val_bar.set_description(f"{bar_perfixes['val']} Loss {loss_show}")
+                        _, predicted = torch.max(pred.data, 1)
+                        total += labels.size(0)
+                        correct += (predicted == labels).sum().item()
+                    val_acc = 100 * correct / total
+                    print('Current Accuracy on val set: Epoch {}, {} %'.format(epoch_idx, val_acc))
+                    save_acc_path = os.path.join(save_dir, 'acc_val_txt')
+                    with open(save_acc_path, 'a') as ff_v:
+                        ff_v.write("Epoch:" + str(epoch_idx) + '\n')
+                        ff_v.write("Correct_val:" + str(correct) + '\n')
+                        ff_v.write("Accuracy_val:" + str(val_acc) + '\n')
+                        ff_v.write('\n')
+                    summary.add_scalar(f"scalar/val_acc", val_acc, global_step=epoch_idx, walltime=None)
 
     print("do test and compute accuracy")
     with torch.no_grad():
@@ -160,6 +164,7 @@ if __name__ == '__main__':
     parser.add_argument('-sm', '--sgd_momentum', type=float, default=0.0)
     parser.add_argument('-v', '--is_val', action='store_true', help="whether do validation and split train set")
     parser.add_argument('-log', '--log_interval', type=int, default=50)
+    parser.add_argument('-eval', '--eval_interval', type=int, default=1)
 
     if not os.path.exists('./exp'):
         os.mkdir('./exp')
