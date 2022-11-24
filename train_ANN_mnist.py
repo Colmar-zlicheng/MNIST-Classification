@@ -9,6 +9,7 @@ import torchvision.transforms as transforms
 from lib.model.MNIST import MNIST
 from lib.utils.etqdm import etqdm
 from lib.utils.misc import bar_perfixes
+from lib.utils.save_results import save_results_ANN
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -36,6 +37,7 @@ def save_Hyperparameters(arg):
             f.write("SGD_momentum:" + str(arg.sgd_momentum) + '\n')
         f.write("is_do_validation:" + str(arg.is_val) + '\n')
     return save_dir
+
 
 def ANN_worker(arg, save_dir, summary):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -77,7 +79,7 @@ def ANN_worker(arg, save_dir, summary):
     else:
         raise ValueError(f"no such optimizer_type:{arg.optimizer_type}")
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, arg.decay_step, arg.decay_gamma)
-    print(f"Start training from epoch 0 to {arg.epoch_size}")
+    print(f"<<<<<Start training from epoch 0 to {arg.epoch_size}>>>>>")
     for epoch_idx in range(arg.epoch_size):
         model.train()
         train_bar = etqdm(train_loader)
@@ -147,10 +149,12 @@ def ANN_worker(arg, save_dir, summary):
             ff.write("Correct_test:" + str(correct) + '\n')
             ff.write("Accuracy_test:" + str(acc) + '\n')
 
-    print("beginning save checkpoints")
+    print("-----beginning save checkpoints and results-----")
     save_path = os.path.join(save_dir, 'model.ckpt')
     torch.save(model.state_dict(), save_path)
-    print("successfully save checkpoints")
+    print("-----successfully save checkpoints-----")
+    save_results_ANN(arg=arg, val_acc=val_acc, test_acc=acc, exp=save_dir)
+    print("-----successfully save results-----")
 
 
 if __name__ == '__main__':
@@ -173,7 +177,7 @@ if __name__ == '__main__':
         os.mkdir('./exp/ANN')
 
     arg = parser.parse_args()
-    print(f"Start training with ANN")
+    print("<<<<<Start training with ANN>>>>")
     datetime = datetime.datetime.now()
     start = time.time()
 
@@ -183,7 +187,7 @@ if __name__ == '__main__':
     os.mkdir(summary_dir)
     summary = SummaryWriter(summary_dir)
 
-    ANN_worker(arg, save_dir, summary)
+    ANN_worker(arg=arg, save_dir=save_dir, summary=summary)
 
     end = time.time()
     print('Running time: %s Seconds' % (end - start))
