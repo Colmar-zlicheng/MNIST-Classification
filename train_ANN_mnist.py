@@ -9,12 +9,10 @@ import torchvision.transforms as transforms
 from lib.model.MNIST import MNIST
 from lib.utils.etqdm import etqdm
 from lib.utils.misc import bar_perfixes
-
-def SVM_worker(arg):
-    return 0
+from torch.utils.tensorboard import SummaryWriter
 
 
-def ANN_worker(arg, save_dir):
+def ANN_worker(arg, save_dir, summary):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if not os.path.exists('./data'):
         os.mkdir('./data')
@@ -43,22 +41,31 @@ def ANN_worker(arg, save_dir):
                                               shuffle=False)
 
     model = MNIST(num_class=10).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=arg.learning_rate)
+    if arg.optimizer_type == 'Adam':
+        optimizer = torch.optim.Adam(model.parameters(), lr=arg.learning_rate, weight_decay=arg.weight_decay)
+    elif arg.optimizer_type == 'AdamW':
+        optimizer = torch.optim.AdamW(model.parameters(), lr=arg.learning_rate, weight_decay=arg.weight_decay)
+    elif arg.optimizer_type == 'SGD':
+        optimizer = torch.optim.SGD(model.parameters(),
+                                    lr=arg.learning_rate, momentum=arg.sgd_momentum, weight_decay=arg.weight_decay)
+    else:
+        raise ValueError(f"no such optimizer_type:{arg.optimizer_type}")
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, arg.decay_step, arg.decay_gamma)
     print(f"Start training from epoch 0 to {arg.epoch_size}")
     for epoch_idx in range(arg.epoch_size):
         model.train()
         train_bar = etqdm(train_loader)
         for bidx, (images, labels) in enumerate(train_bar):
-            # step_idx = epoch_idx * len(train_loader) + bidx
+            step_idx = epoch_idx * len(train_loader) + bidx
             pred, loss = model(images.to(device), labels.to(device))  # , step_idx, 'train')
 
             loss_show = ('%.12f' % loss)
             train_bar.set_description(f"{bar_perfixes['train']} Epoch {epoch_idx} Loss {loss_show}")
-
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            if step_idx % arg.log_interval == 0:
+                summary.add_scalar(f"scalar/loss", loss, global_step=step_idx, walltime=None)
 
         scheduler.step()
         print(f"Current LR: {[group['lr'] for group in optimizer.param_groups]}")
@@ -112,44 +119,53 @@ def ANN_worker(arg, save_dir):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--type', type=str, default='ANN', choices=['SVM,ANN'])
     parser.add_argument('-b', '--batch_size', type=int, default=100)
     parser.add_argument('-e', '--epoch_size', type=int, default=10)
     parser.add_argument('-lr', '--learning_rate', type=float, default=0.001)
-    parser.add_argument('-ds', '--decay_step', type=int, default=5)
+    parser.add_argument('-ds', '--decay_step', type=int, default=6)
     parser.add_argument('-dg', '--decay_gamma', type=float, default=0.1)
+    parser.add_argument('-wd', '--weight_decay', type=float, default=0.0)
+    parser.add_argument('-ot', '--optimizer_type', type=str, default='Adam', choices=['Adam', 'AdamW', 'SGD'])
+    parser.add_argument('-sm', '--sgd_momentum', type=float, default=0.0)
     parser.add_argument('-v', '--is_val', action='store_true', help="whether do validation and split train set")
+    parser.add_argument('-log', '--log_interval', type=int, default=50)
+
     if not os.path.exists('./exp'):
         os.mkdir('./exp')
     arg = parser.parse_args()
-    print(f"Start training with {arg.type}")
+    print(f"Start training with ANN")
     datetime = datetime.datetime.now()
     start = time.time()
-    if arg.type == 'SVM':
-        if not os.path.exists('./exp/SVM'):
-            os.mkdir('./exp/SVM')
-        save_dir = './exp/SVM'
-        SVM_worker(arg)
-    elif arg.type == 'ANN':
-        if not os.path.exists('./exp/ANN'):
-            os.mkdir('./exp/ANN')
-        save_name = f"train_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
-                    f"ds{arg.decay_step}dg{arg.decay_gamma}_" \
-                    f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}{datetime.second}"
-        save_dir = os.path.join('./exp/ANN', save_name)
-        os.mkdir(save_dir)
-        hype_dir = os.path.join(save_dir, 'Hyperparameters.txt')
-        with open(hype_dir,'w') as f:
-            f.write("ANN_Hyperparameters:" + '\n')
-            f.write("epoch_size:" + str(arg.epoch_size) + '\n')
-            f.write("batch_size:" + str(arg.batch_size) + '\n')
-            f.write("learning_rate:" + str(arg.learning_rate) + '\n')
-            f.write("decay_step:" + str(arg.decay_step) + '\n')
-            f.write("decay_gamma:" + str(arg.decay_gamma) + '\n')
-            f.write("is_do_validation:" + str(arg.is_val) + '\n')
-        ANN_worker(arg, save_dir)
+
+    if not os.path.exists('./exp/ANN'):
+        os.mkdir('./exp/ANN')
+    if arg.is_val is True:
+        run_type = 'val'
     else:
-        raise ValueError("{} is not supported ".format(arg.type))
+        run_type = 'train'
+    save_name = f"{run_type}_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
+                f"{arg.optimizer_type}_ds{arg.decay_step}_" \
+                f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}{datetime.second}"
+    save_dir = os.path.join('./exp/ANN', save_name)
+    os.mkdir(save_dir)
+    hype_dir = os.path.join(save_dir, 'Hyperparameters.txt')
+    with open(hype_dir,'w') as f:
+        f.write("ANN_Hyperparameters:" + '\n')
+        f.write("epoch_size:" + str(arg.epoch_size) + '\n')
+        f.write("batch_size:" + str(arg.batch_size) + '\n')
+        f.write("learning_rate:" + str(arg.learning_rate) + '\n')
+        f.write("decay_step:" + str(arg.decay_step) + '\n')
+        f.write("decay_gamma:" + str(arg.decay_gamma) + '\n')
+        f.write("weight_decay:" + str(arg.weight_decay) + '\n')
+        f.write("optimizer_type:" + str(arg.optimizer_type) + '\n')
+        if arg.optimizer_type == 'SGD':
+            f.write("SGD_momentum:" + str(arg.sgd_momentum) + '\n')
+        f.write("is_do_validation:" + str(arg.is_val) + '\n')
+    summary_dir = os.path.join(save_dir, 'run')
+    os.mkdir(summary_dir)
+    summary = SummaryWriter(summary_dir)
+    ANN_worker(arg, save_dir, summary)
+
     end = time.time()
     print('Running time: %s Seconds' % (end - start))
     save_time_dir = os.path.join(save_dir, 'RunningTime.txt')
