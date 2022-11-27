@@ -22,8 +22,12 @@ def save_results_ANN(arg, val_acc, test_acc, exp):
     else:
         do_val = 'False'
         val_acc = '--'
+    if arg.decay_step > arg.epoch_size:
+        decay_step = '--'
+    else:
+        decay_step = arg.decay_step
     csv_writer.writerow([str(total), str(arg.epoch_size), str(arg.batch_size), str(arg.learning_rate),
-                         str(arg.decay_step), str(arg.decay_gamma), str(arg.weight_decay),
+                         str(decay_step), str(arg.decay_gamma), str(arg.weight_decay),
                          str(arg.optimizer_type), sgd_momentum, do_val,
                          str(val_acc)+'%', str(test_acc)+'%', str(exp)])
     file.close()
