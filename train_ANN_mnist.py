@@ -61,8 +61,9 @@ def ANN_worker(arg, save_dir, summary):
         total = 0
         for bidx, (images, labels) in enumerate(train_bar):
             step_idx = epoch_idx * len(train_loader) + bidx
-            pred, loss = model(images.to(device), labels.to(device))  # , step_idx, 'train')
-
+            images = images.to(device)
+            labels = labels.to(device)
+            pred, loss = model(images, labels)
             loss_show = ('%.12f' % loss)
             train_bar.set_description(f"{bar_perfixes['train']} Epoch {epoch_idx} Loss {loss_show}")
             optimizer.zero_grad()
@@ -87,7 +88,9 @@ def ANN_worker(arg, save_dir, summary):
                     model.eval()
                     val_bar = etqdm(val_loader)
                     for bidx, (images, labels) in enumerate(val_bar):
-                        pred, loss = model(images.to(device), labels.to(device))
+                        images = images.to(device)
+                        labels = labels.to(device)
+                        pred, loss = model(images, labels)
                         loss_show = ('%.12f' % loss)
                         val_bar.set_description(f"{bar_perfixes['val']} Loss {loss_show}")
                         _, predicted = torch.max(pred.data, 1)
@@ -110,7 +113,9 @@ def ANN_worker(arg, save_dir, summary):
         model.eval()
         test_bar = etqdm(test_loader)
         for bidx, (images, labels) in enumerate(test_bar):
-            pred, loss = model(images.to(device), labels.to(device))
+            images = images.to(device)
+            labels = labels.to(device)
+            pred, loss = model(images, labels)
             loss_show = ('%.12f' % loss)
             test_bar.set_description(f"{bar_perfixes['test']} Loss {loss_show}")
             _, predicted = torch.max(pred.data, 1)
