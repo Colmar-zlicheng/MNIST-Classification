@@ -153,6 +153,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--is_val', action='store_true', help="whether do validation and split train set")
     parser.add_argument('-log', '--log_interval', type=int, default=50)
     parser.add_argument('-eval', '--eval_interval', type=int, default=1)
+    parser.add_argument('-exp', '--exp_id', type=str)
 
     if not os.path.exists('./exp'):
         os.mkdir('./exp')

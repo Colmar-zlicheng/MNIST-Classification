@@ -9,9 +9,12 @@ def save_Hyperparameters_ANN(arg):
         run_type = 'val'
     else:
         run_type = 'train'
-    save_name = f"{run_type}_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
-                f"{arg.optimizer_type}_ds{arg.decay_step}_" \
-                f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}{datetime.second}"
+    if arg.exp_id is not None:
+        save_name = arg.exp_id
+    else:
+        save_name = f"{run_type}_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
+                    f"{arg.optimizer_type}_ds{arg.decay_step}_" \
+                    f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}{datetime.second}"
     save_dir = os.path.join('./exp/ANN', save_name)
     os.mkdir(save_dir)
     hype_dir = os.path.join(save_dir, 'Hyperparameters.txt')
