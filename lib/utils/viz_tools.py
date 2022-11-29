@@ -1,3 +1,6 @@
+# if u use windows, you may need these two lines of code:
+# import sys
+# sys.path.append('.')
 import numpy as np
 import torch
 import torchvision
