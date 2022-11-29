@@ -14,6 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 def ANN_worker(arg, save_dir, summary):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print("Use device:", device)
     if not os.path.exists('./data'):
         os.mkdir('./data')
     torch.manual_seed(0)
