@@ -31,6 +31,8 @@ def save_Hyperparameters_ANN(arg):
 
 
 def save_results_ANN(arg, val_acc, test_acc, exp):
+    if not os.path.exists('./results'):
+        os.mkdir('./results')
     log_path = './results/ANN_results.csv'
     file = open(log_path, 'a+', encoding='utf-8', newline='')
     csv_writer = csv.writer(file)
