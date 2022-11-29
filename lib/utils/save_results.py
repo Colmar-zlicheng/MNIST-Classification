@@ -1,4 +1,33 @@
+import os
 import csv
+
+
+def save_Hyperparameters_ANN(arg):
+    import datetime
+    datetime = datetime.datetime.now()
+    if arg.is_val is True:
+        run_type = 'val'
+    else:
+        run_type = 'train'
+    save_name = f"{run_type}_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
+                f"{arg.optimizer_type}_ds{arg.decay_step}_" \
+                f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}{datetime.second}"
+    save_dir = os.path.join('./exp/ANN', save_name)
+    os.mkdir(save_dir)
+    hype_dir = os.path.join(save_dir, 'Hyperparameters.txt')
+    with open(hype_dir, 'w') as f:
+        f.write("ANN_Hyperparameters:" + '\n')
+        f.write("epoch_size:" + str(arg.epoch_size) + '\n')
+        f.write("batch_size:" + str(arg.batch_size) + '\n')
+        f.write("learning_rate:" + str(arg.learning_rate) + '\n')
+        f.write("decay_step:" + str(arg.decay_step) + '\n')
+        f.write("decay_gamma:" + str(arg.decay_gamma) + '\n')
+        f.write("weight_decay:" + str(arg.weight_decay) + '\n')
+        f.write("optimizer_type:" + str(arg.optimizer_type) + '\n')
+        if arg.optimizer_type == 'SGD':
+            f.write("SGD_momentum:" + str(arg.sgd_momentum) + '\n')
+        f.write("is_do_validation:" + str(arg.is_val) + '\n')
+    return save_dir
 
 
 def save_results_ANN(arg, val_acc, test_acc, exp):
@@ -34,6 +63,8 @@ def save_results_ANN(arg, val_acc, test_acc, exp):
 
 
 if __name__ == '__main__':
+    # just for test in developing
+    # don't run this script directly
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--batch_size', type=int, default=100)

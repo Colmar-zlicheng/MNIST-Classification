@@ -3,40 +3,13 @@ import torch
 import torch.nn as nn
 import time
 import argparse
-import datetime
 import torchvision
 import torchvision.transforms as transforms
 from lib.model.MNIST import MNIST
 from lib.utils.etqdm import etqdm
 from lib.utils.misc import bar_perfixes
-from lib.utils.save_results import save_results_ANN
+from lib.utils.save_results import save_Hyperparameters_ANN, save_results_ANN
 from torch.utils.tensorboard import SummaryWriter
-
-
-def save_Hyperparameters(arg):
-    if arg.is_val is True:
-        run_type = 'val'
-    else:
-        run_type = 'train'
-    save_name = f"{run_type}_ep{arg.epoch_size}_bs{arg.batch_size}_lr{arg.learning_rate}_" \
-                f"{arg.optimizer_type}_ds{arg.decay_step}_" \
-                f"{datetime.year}_{datetime.month}{datetime.day}_{datetime.hour}{datetime.minute}{datetime.second}"
-    save_dir = os.path.join('./exp/ANN', save_name)
-    os.mkdir(save_dir)
-    hype_dir = os.path.join(save_dir, 'Hyperparameters.txt')
-    with open(hype_dir, 'w') as f:
-        f.write("ANN_Hyperparameters:" + '\n')
-        f.write("epoch_size:" + str(arg.epoch_size) + '\n')
-        f.write("batch_size:" + str(arg.batch_size) + '\n')
-        f.write("learning_rate:" + str(arg.learning_rate) + '\n')
-        f.write("decay_step:" + str(arg.decay_step) + '\n')
-        f.write("decay_gamma:" + str(arg.decay_gamma) + '\n')
-        f.write("weight_decay:" + str(arg.weight_decay) + '\n')
-        f.write("optimizer_type:" + str(arg.optimizer_type) + '\n')
-        if arg.optimizer_type == 'SGD':
-            f.write("SGD_momentum:" + str(arg.sgd_momentum) + '\n')
-        f.write("is_do_validation:" + str(arg.is_val) + '\n')
-    return save_dir
 
 
 def ANN_worker(arg, save_dir, summary):
@@ -182,10 +155,10 @@ if __name__ == '__main__':
 
     arg = parser.parse_args()
     print("<<<<<Start training with ANN>>>>")
-    datetime = datetime.datetime.now()
+
     start = time.time()
 
-    save_dir = save_Hyperparameters(arg)
+    save_dir = save_Hyperparameters_ANN(arg)
 
     summary_dir = os.path.join(save_dir, 'run')
     os.mkdir(summary_dir)
