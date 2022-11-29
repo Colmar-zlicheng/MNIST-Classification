@@ -13,8 +13,9 @@ def main():
     exp_list = []
     for row in ANN_csv:
         exp_list.append(row[-1])
-    pop_id = ANN_exp_dir.index('.DS_Store')  # hide file for mac
-    ANN_exp_dir.pop(pop_id)
+    if '.DS_Store' in ANN_exp_dir:
+        pop_id = ANN_exp_dir.index('.DS_Store')  # hide file for mac
+        ANN_exp_dir.pop(pop_id)
     # print(exp_list)
     for idir in ANN_exp_dir:
         dir = os.path.join('./exp/ANN', idir)
