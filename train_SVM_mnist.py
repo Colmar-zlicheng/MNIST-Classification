@@ -12,6 +12,8 @@ from lib.utils.save_results import save_results_SVM
 
 def SVM_worker(arg, save_dir):
     print("Preparing data...")
+    if not os.path.exists('./data'):
+        os.mkdir('./data')
     train_dataset = torchvision.datasets.MNIST(root='./data',
                                               train=False,
                                               transform=transforms.ToTensor())
