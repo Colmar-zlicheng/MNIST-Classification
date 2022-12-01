@@ -101,4 +101,4 @@ if __name__ == '__main__':
     parser.add_argument('-log', '--log_interval', type=int, default=50)
     parser.add_argument('-eval', '--eval_interval', type=int, default=1)
     arg = parser.parse_args()
-    save_results_ANN(arg, 50, 30, './test/path')
+    save_results_ANN(arg, -100, -100, './test/path')
