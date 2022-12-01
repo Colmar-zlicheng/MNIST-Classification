@@ -3,6 +3,7 @@
 # sys.path.append('.')
 import numpy as np
 import torch
+import joblib
 import torchvision
 import torchvision.transforms as transforms
 from matplotlib import pyplot as plt
@@ -11,7 +12,7 @@ from lib.utils.etqdm import etqdm
 from lib.utils.misc import bar_perfixes
 
 
-def viz_results(arg):
+def viz_results_ANN(arg):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     test_dataset = torchvision.datasets.MNIST(root='./data',
                                               train=False,
@@ -45,6 +46,26 @@ def viz_results(arg):
         plt.show()
 
 
+def viz_results_SVM(arg):
+    test_dataset = torchvision.datasets.MNIST(root='./data',
+                                              train=False,
+                                              transform=transforms.ToTensor())
+    test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
+                                              batch_size=arg.batch_size,
+                                              shuffle=False)
+    example_images, example_targets = test_dataset._load_data()
+    svc = joblib.load(arg.ckpt)
+    predicts = svc.predict(example_images.flatten(1, 2))
+    for i, c in enumerate(np.random.randint(0, 10000, arg.size ** 2)):
+        plt.subplot(arg.size, arg.size, i + 1)
+        plt.tight_layout()
+        plt.imshow(example_images[c], cmap='gray', interpolation='none')
+        plt.title("GT:{},pred:{}".format(example_targets[c], predicts[c]))
+        plt.xticks([])
+        plt.yticks([])
+    plt.show()
+
+
 def viz_dataset(arg):
     train_dataset = torchvision.datasets.MNIST(root='./data',
                                                train=True,
@@ -66,6 +87,7 @@ def viz_dataset(arg):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--type', type=str, default='ANN', choices=['SVM', 'ANN'])
     parser.add_argument('-m', '--mode', default='test', choices=['test', 'train'], type=str)
     parser.add_argument('-b', '--batch_size', default=100, type=int)
     parser.add_argument('-c', '--ckpt', type=str)
@@ -76,7 +98,12 @@ if __name__ == '__main__':
     if arg.mode == 'train':
         viz_dataset(arg)
     elif arg.mode == 'test':
-        if arg.ckpt is None:
-            assert False, "ckpt path is needed"
-        viz_results(arg)
+        if arg.type == 'ANN':
+            if arg.ckpt is None:
+                assert False, "ckpt path is needed"
+            viz_results_ANN(arg)
+        elif arg.type == 'SVM':
+            if arg.ckpt is None:
+                assert False, "ckpt path is needed"
+            viz_results_SVM(arg)
 
