@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser.add_argument('-kt', '--kernel_type', type=str, default='linear',
                         choices=['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'])
     parser.add_argument('-exp', '--exp_id', type=str)
-    parser.add_argument('-g', '--gamma',type=str, default='scale')
+    parser.add_argument('-g', '--gamma', type=str, default='scale')
 
     arg = parser.parse_args()
 
