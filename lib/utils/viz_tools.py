@@ -1,3 +1,5 @@
+# if u use macOS or linux, you should run follow cmd in your terminal at root path:
+# export PYTHONPATH="./:$PYTHONPATH"
 # if u use windows, you may need these two lines of code:
 # import sys
 # sys.path.append('.')
