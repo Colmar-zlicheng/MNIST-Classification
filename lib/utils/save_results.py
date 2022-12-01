@@ -67,6 +67,25 @@ def save_results_ANN(arg, val_acc, test_acc, exp):
     file.close()
 
 
+def save_results_SVM(arg, acc, correct, exp):
+    if not os.path.exists('./results'):
+        os.mkdir('./results')
+    log_path = './results/SVM_results.csv'
+    file = open(log_path, 'a+', encoding='utf-8', newline='')
+    csv_writer = csv.writer(file)
+
+    total = len(open(log_path).readlines())
+    if total == 0:
+        csv_writer.writerow(['ID', 'C', 'kernel', 'gamma', 'acc', 'correct', 'exp'])
+        total += 1
+
+    csv_writer.writerow([str(total), str(arg.C), str(arg.kernel_type), str(arg.gamma),
+                         str(acc), str(correct), str(exp)])
+    file.close()
+
+
+
+
 if __name__ == '__main__':
     # just for test in developing
     # don't run this script directly
