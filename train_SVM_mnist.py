@@ -27,7 +27,7 @@ def SVM_worker(arg, save_dir):
     print("Start training...")
     svc = svm.SVC(C=arg.C, gamma=arg.gamma, kernel=arg.kernel_type)
     svc.fit(train_data, train_label)
-    print("Starting testing...")
+    print("Start testing...")
     test_result = svc.predict(test_data)
     test_result = torch.tensor(test_result)
     correct = (test_result == test_label).sum().item()
