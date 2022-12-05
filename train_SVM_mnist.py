@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--C', type=float, default=1.0)
     # parser.add_argument('-m', '--mode', type=str, default='ovr', choices=['ovr', 'ovo'])
     parser.add_argument('-kt', '--kernel_type', type=str, default='linear',
-                        choices=['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'])
+                        choices=['linear', 'poly', 'rbf', 'sigmoid'])
     parser.add_argument('-exp', '--exp_id', type=str)
     parser.add_argument('-g', '--gamma', type=str, default='scale')
 
