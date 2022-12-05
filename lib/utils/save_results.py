@@ -76,10 +76,15 @@ def save_results_SVM(arg, acc, correct, exp):
 
     total = len(open(log_path).readlines())
     if total == 0:
-        csv_writer.writerow(['ID', 'C', 'kernel', 'gamma', 'acc', 'correct', 'exp'])
+        csv_writer.writerow(['ID', 'split_train', 'C', 'kernel', 'gamma', 'acc', 'correct', 'exp'])
         total += 1
 
-    csv_writer.writerow([str(total), str(arg.C), str(arg.kernel_type), str(arg.gamma),
+    if arg.split_train is True:
+        split_train = 'True'
+    else:
+        split_train = 'False'
+
+    csv_writer.writerow([str(total), str(split_train), str(arg.C), str(arg.kernel_type), str(arg.gamma),
                          str('%.2f' % (acc*100))+'%', str(correct), str(exp)])
     file.close()
 
