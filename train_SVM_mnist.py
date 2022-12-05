@@ -14,14 +14,35 @@ def SVM_worker(arg, save_dir):
     print("Preparing data...")
     if not os.path.exists('./data'):
         os.mkdir('./data')
+    torch.manual_seed(0)
     train_dataset = torchvision.datasets.MNIST(root='./data',
-                                              train=True,
-                                              transform=transforms.ToTensor())
+                                               train=True,
+                                               transform=transforms.ToTensor(),
+                                               download=True)
     test_dataset = torchvision.datasets.MNIST(root='./data',
                                               train=False,
                                               transform=transforms.ToTensor())
-    train_data, train_label = train_dataset._load_data()
+
+    train_data0, train_label0 = train_dataset._load_data()
     test_data, test_label = test_dataset._load_data()
+    if arg.split_train is True:
+        print("split train into 1000 examples for each class(10000 examples in total)")
+        # count: [5923, 6742, 5958, 6131, 5842, 5421, 5918, 6265, 5851, 5949]
+        _, _, count = torch.unique(train_label0, return_inverse=True, return_counts=True)
+        train_data = []
+        train_label = []
+        for i in range(10):
+            index_i = torch.nonzero(train_label0 == i).reshape(-1)
+            index_i = index_i[torch.randint(0, count[i], (1000,))]
+            train_data_i = train_data0[index_i]
+            train_label_i = train_label0[index_i]
+            train_data.append(train_data_i)
+            train_label.append(train_label_i)
+        train_data = torch.cat(train_data)
+        train_label = torch.cat(train_label)
+    else:
+        train_data = train_data0
+        train_label = train_label0
     train_data = train_data.flatten(1, 2)
     test_data = test_data.flatten(1, 2)
     print("Start training...")
@@ -51,6 +72,7 @@ if __name__ == '__main__':
                         choices=['linear', 'poly', 'rbf', 'sigmoid'])
     parser.add_argument('-exp', '--exp_id', type=str)
     parser.add_argument('-g', '--gamma', type=str, default='scale')
+    parser.add_argument('-s', '--split_train', action='store_false', help="whether to use small train set")
 
     arg = parser.parse_args()
 
