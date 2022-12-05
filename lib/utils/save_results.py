@@ -80,7 +80,7 @@ def save_results_SVM(arg, acc, correct, exp):
         total += 1
 
     csv_writer.writerow([str(total), str(arg.C), str(arg.kernel_type), str(arg.gamma),
-                         str(acc*100)+'%', str(correct), str(exp)])
+                         str('%.2f' % (acc*100))+'%', str(correct), str(exp)])
     file.close()
 
 
