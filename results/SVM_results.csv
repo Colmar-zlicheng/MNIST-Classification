@@ -1,0 +1,9 @@
+ID,split_train,C,kernel,gamma,acc,correct,exp
+1,True,1.0,linear,scale,91.21%,9121,./exp/SVM/linear_C1.0_scale_2022_125_151944
+2,True,0.1,linear,scale,91.21%,9121,./exp/SVM/linear_C0.1_scale_2022_125_152359
+3,True,10.0,linear,scale,91.21%,9121,./exp/SVM/linear_C10.0_scale_2022_125_152417
+4,True,1e-06,linear,scale,93.16%,9316,./exp/SVM/linear_C1e-06_scale_2022_125_152452
+5,True,1.0,rbf,scale,96.48%,9648,./exp/SVM/rbf_C1.0_scale_2022_125_152511
+6,True,0.1,rbf,scale,93.35%,9335,./exp/SVM/rbf_C0.1_scale_2022_125_184633
+7,True,2.0,rbf,scale,96.75%,9675,./exp/SVM/rbf_C2.0_scale_2022_125_184713
+8,True,10.0,rbf,scale,96.83%,9683,./exp/SVM/rbf_C10.0_scale_2022_125_184742

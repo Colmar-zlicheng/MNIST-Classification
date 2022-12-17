@@ -1,0 +1,12 @@
+ID,Epoch_size,Batch_size,learning_rate,decay_step,decay_gamma,weight_decay,optimizer_type,sgd_momentum,do_val(split train),val_acc,test_acc,exp
+1,10,100,0.001,6,0.1,0.0,Adam,--,True,98.38%,98.42%,./exp/ANN/val_ep10_bs100_lr0.001_Adam_ds6_2022_1124_225848
+2,30,100,0.001,6,0.1,0.0,Adam,--,True,98.36%,98.48%,./exp/ANN/val_ep30_bs100_lr0.001_Adam_ds6_2022_1124_23127
+3,15,100,0.001,10,0.1,0.0,Adam,--,True,98.36%,98.47%,./exp/ANN/val_ep15_bs100_lr0.001_Adam_ds10_2022_1124_231146
+4,15,128,0.002,4,0.1,0.0,Adam,--,True,98.28%,98.41%,./exp/ANN/val_ep15_bs128_lr0.002_Adam_ds4_2022_1126_204523
+5,15,200,0.001,6,0.1,0.0,Adam,--,True,98.29%,98.44%,./exp/ANN/val_ep15_bs200_lr0.001_Adam_ds6_2022_1126_204841
+6,15,100,0.001,6,0.1,0.01,Adam,--,True,94.89%,95.44%,./exp/ANN/val_ep15_bs100_lr0.001_Adam_ds6_2022_1126_205113
+7,15,100,0.001,6,0.1,0.0,Adam,--,True,98.34%,98.47%,./exp/ANN/val_ep15_bs100_lr0.001_Adam_ds6_2022_1126_205542
+8,15,100,0.001,6,0.1,0.0,AdamW,--,True,98.34%,98.47%,./exp/ANN/val_ep15_bs100_lr0.001_AdamW_ds6_2022_1126_21227
+9,15,100,0.001,4,0.5,0.0,Adam,--,True,98.45%,98.47%,./exp/ANN/val_ep15_bs100_lr0.001_Adam_ds4_2022_1127_161715
+10,15,100,0.001,--,0.1,0.0,Adam,--,True,97.8%,98.01%,./exp/ANN/val_ep15_bs100_lr0.001_Adam_ds100_2022_1127_16246
+11,15,100,0.001,1,0.99,0.0,Adam,--,True,98.06%,97.83%,./exp/ANN/val_ep15_bs100_lr0.001_Adam_ds1_2022_1127_16295
