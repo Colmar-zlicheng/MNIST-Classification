@@ -66,9 +66,9 @@ def SVM_worker(arg, save_dir):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--C', type=float, default=1.0)
+    parser.add_argument('-c', '--C', type=float, default=11.0)
     # parser.add_argument('-m', '--mode', type=str, default='ovr', choices=['ovr', 'ovo'])
-    parser.add_argument('-kt', '--kernel_type', type=str, default='linear',
+    parser.add_argument('-kt', '--kernel_type', type=str, default='rbf',
                         choices=['linear', 'poly', 'rbf', 'sigmoid'])
     parser.add_argument('-exp', '--exp_id', type=str)
     parser.add_argument('-g', '--gamma', type=str, default='scale')
