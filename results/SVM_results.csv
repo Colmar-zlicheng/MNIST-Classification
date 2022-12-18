@@ -7,3 +7,15 @@ ID,split_train,C,kernel,gamma,acc,correct,exp
 6,True,0.1,rbf,scale,93.35%,9335,./exp/SVM/rbf_C0.1_scale_2022_125_184633
 7,True,2.0,rbf,scale,96.75%,9675,./exp/SVM/rbf_C2.0_scale_2022_125_184713
 8,True,10.0,rbf,scale,96.83%,9683,./exp/SVM/rbf_C10.0_scale_2022_125_184742
+9,True,1.0,poly,scale,95.48%,9548,./exp/SVM/poly_C1.0_scale_2022_1218_13817
+10,True,1.0,sigmoid,scale,82.52%,8252,./exp/SVM/sigmoid_C1.0_scale_2022_1218_13842
+11,True,100.0,rbf,scale,96.85%,9685,./exp/SVM/rbf_C100.0_scale_2022_1218_15169
+12,True,1000.0,rbf,scale,96.85%,9685,./exp/SVM/rbf_C1000.0_scale_2022_1218_15178
+13,True,10000.0,rbf,scale,96.85%,9685,./exp/SVM/rbf_C10000.0_scale_2022_1218_15187
+14,True,100000000.0,rbf,scale,96.85%,9685,./exp/SVM/rbf_C100000000.0_scale_2022_1218_151833
+15,True,20.0,rbf,scale,96.85%,9685,./exp/SVM/rbf_C20.0_scale_2022_1218_151855
+16,True,15.0,rbf,scale,96.85%,9685,./exp/SVM/rbf_C15.0_scale_2022_1218_152057
+17,True,12.0,rbf,scale,96.85%,9685,./exp/SVM/rbf_C12.0_scale_2022_1218_152135
+18,True,11.0,rbf,scale,96.85%,9685,./exp/SVM/rbf_C11.0_scale_2022_1218_15228
+19,True,10.5,rbf,scale,96.84%,9684,./exp/SVM/rbf_C10.5_scale_2022_1218_152247
+20,True,0.01,rbf,scale,85.40%,8540,./exp/SVM/rbf_C0.01_scale_2022_1218_15245
