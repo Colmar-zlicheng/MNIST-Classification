@@ -142,9 +142,9 @@ def ANN_worker(arg, save_dir, summary):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--batch_size', type=int, default=100)
-    parser.add_argument('-e', '--epoch_size', type=int, default=10)
+    parser.add_argument('-e', '--epoch_size', type=int, default=15)
     parser.add_argument('-lr', '--learning_rate', type=float, default=0.001)
-    parser.add_argument('-ds', '--decay_step', type=int, default=6)
+    parser.add_argument('-ds', '--decay_step', type=int, default=5)
     parser.add_argument('-dg', '--decay_gamma', type=float, default=0.1)
     parser.add_argument('-wd', '--weight_decay', type=float, default=0.0)
     parser.add_argument('-ot', '--optimizer_type', type=str, default='Adam', choices=['Adam', 'AdamW', 'SGD'])
