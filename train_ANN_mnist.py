@@ -120,7 +120,7 @@ def ANN_worker(arg, save_dir, summary):
             _, predicted = torch.max(pred.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-            acc = 100 * correct / total
+        acc = 100 * correct / total
         print('Accuracy on test set: {} %'.format(acc))
         save_acc_path = os.path.join(save_dir, 'acc_test_txt')
         with open(save_acc_path, 'w') as ff:
