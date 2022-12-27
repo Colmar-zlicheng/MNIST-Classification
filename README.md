@@ -15,7 +15,7 @@ datetime
 ```
 
 ### data
-```shell
+```
 torchvision.datasets.MNIST()
 ```
 Datas will be download into ./data
