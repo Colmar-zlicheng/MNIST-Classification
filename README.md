@@ -4,7 +4,7 @@
 Project 2 for CS3317-2@SJTU
 
 ### requirements
-```shell
+```
 torch
 torchvision
 tensorboard
